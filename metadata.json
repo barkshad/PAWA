@@ -1,5 +1,5 @@
 {
-  "name": "PAWA Consultation",
-  "description": "A responsive web application for collecting youth consultation surveys for the Progressive Action Welfare Alliance.",
+  "name": "PAWA National Youth Consultation",
+  "description": "A secure platform for the Progressive Action Welfare Alliance (PAWA) to collect and manage youth consultation data nationwide.",
   "requestFramePermissions": []
 }

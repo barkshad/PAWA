@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { api } from '../services/api';
-import { Loader2, Lock } from 'lucide-react';
+import { Lock, AlertCircle } from 'lucide-react';
+import { Layout } from './Layout';
+import { Card } from './ui/Card';
+import { Input } from './ui/Input';
+import { Button } from './ui/Button';
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -22,65 +26,75 @@ export default function AdminLogin({ onLogin, onCancel }: AdminLoginProps) {
       await api.loginAdmin(email, password);
       onLogin();
     } catch (err: any) {
-      setError(err.message || 'Failed to login');
+      console.error(err);
+      setError('Invalid credentials. Please check your email and password.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border-t-4 border-[#D62828]">
-      <div className="bg-[#002855] p-6 text-white flex items-center gap-3">
-        <Lock className="w-6 h-6" />
-        <h2 className="text-xl font-bold">PAWA Admin Access</h2>
-      </div>
-      
-      <form onSubmit={handleLogin} className="p-8 space-y-6">
-        {error && (
-          <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">
-            {error}
+    <Layout maxWidth="sm">
+      <Card noPadding className="overflow-hidden border-t-4 border-pawa-blue shadow-lg">
+        <div className="bg-pawa-blue p-6 text-white flex items-center gap-3">
+          <div className="p-2 bg-white/10 rounded-lg">
+            <Lock className="w-5 h-5 text-white" />
           </div>
-        )}
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-          <input
-            type="email"
-            required
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#002855] focus:border-[#002855] outline-none"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-          />
+          <div>
+            <h2 className="text-lg font-bold">Admin Portal</h2>
+            <p className="text-xs text-blue-200">Secure Access Required</p>
+          </div>
         </div>
         
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-          <input
-            type="password"
-            required
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#002855] focus:border-[#002855] outline-none"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-          />
-        </div>
+        <form onSubmit={handleLogin} className="p-8 space-y-6">
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-100">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {error}
+            </div>
+          )}
+          
+          <div className="space-y-4">
+            <Input
+              label="Email Address"
+              type="email"
+              placeholder="admin@example.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              autoFocus
+            />
+            
+            <Input
+              label="Password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-        <div className="flex gap-3 pt-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 rounded-lg transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-[#002855] hover:bg-blue-900 text-white font-medium py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            {loading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Login'}
-          </button>
-        </div>
-      </form>
-    </div>
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onCancel}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="secondary"
+              isLoading={loading}
+              className="flex-1"
+            >
+              Login
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </Layout>
   );
 }

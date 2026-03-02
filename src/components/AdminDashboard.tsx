@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { SurveyData } from '../types';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { Download, LogOut, Loader2, FileText } from 'lucide-react';
+import { generateConsultationReport } from '../utils/pdfGenerator';
+import { Download, LogOut, Loader2, FileText, Users, Calendar } from 'lucide-react';
+import { Layout } from './Layout';
+import { Card } from './ui/Card';
+import { Button } from './ui/Button';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -28,128 +30,120 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   };
 
-  const generatePDF = () => {
-    const doc = new jsPDF();
-
-    // Header
-    doc.setFontSize(20);
-    doc.setTextColor(0, 40, 85); // PAWA Blue
-    doc.text('PAWA Consultation Report', 14, 22);
-    
-    doc.setFontSize(11);
-    doc.setTextColor(100);
-    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
-
-    // Table
-    const tableData = surveys.map(s => [
-      s.name,
-      s.phoneNumber,
-      new Date(s.timestamp).toLocaleDateString(),
-      s.consultationAnswer
-    ]);
-
-    autoTable(doc, {
-      head: [['Name', 'Phone', 'Date', 'Response']],
-      body: tableData,
-      startY: 40,
-      styles: { fontSize: 9, cellPadding: 3 },
-      headStyles: { fillColor: [0, 40, 85], textColor: 255 }, // PAWA Blue
-      columnStyles: {
-        0: { cellWidth: 30 },
-        1: { cellWidth: 30 },
-        2: { cellWidth: 25 },
-        3: { cellWidth: 'auto' }
-      }
-    });
-
-    doc.save('pawa-consultation-report.pdf');
-  };
-
   const handleLogout = async () => {
     await api.logout();
     onLogout();
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden min-h-[600px] flex flex-col border-t-4 border-[#D62828]">
-      <div className="bg-[#002855] p-6 text-white flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-bold">PAWA Dashboard</h2>
-          <p className="text-blue-200 text-sm">Manage and export survey data</p>
+    <Layout maxWidth="xl">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+            <p className="text-slate-500">Overview of consultation responses</p>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800"
+            >
+              <LogOut className="mr-2 h-4 w-4" /> Logout
+            </Button>
+            <Button
+              onClick={() => generateConsultationReport(surveys)}
+              disabled={surveys.length === 0}
+            >
+              <Download className="mr-2 h-4 w-4" /> Export Report
+            </Button>
+          </div>
         </div>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-900 hover:bg-blue-800 rounded-lg transition-colors text-sm border border-blue-700"
-        >
-          <LogOut className="w-4 h-4" /> Logout
-        </button>
-      </div>
 
-      <div className="p-6 flex-1 flex flex-col">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-50 text-[#002855] rounded-lg">
-              <FileText className="w-6 h-6" />
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="flex items-center gap-4">
+            <div className="p-3 bg-blue-50 rounded-lg text-pawa-blue">
+              <FileText className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">Total Responses</h3>
-              <p className="text-2xl font-bold text-[#D62828]">{surveys.length}</p>
+              <p className="text-sm font-medium text-slate-500">Total Responses</p>
+              <p className="text-2xl font-bold text-slate-900">{surveys.length}</p>
             </div>
-          </div>
-          
-          <button
-            onClick={generatePDF}
-            disabled={surveys.length === 0}
-            className="flex items-center gap-2 px-6 py-3 bg-[#D62828] hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-          >
-            <Download className="w-5 h-5" /> Download PDF Report
-          </button>
+          </Card>
+          {/* Add more stats if needed, placeholders for now to balance grid */}
+          <Card className="flex items-center gap-4">
+            <div className="p-3 bg-green-50 rounded-lg text-green-700">
+              <Users className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Participants</p>
+              <p className="text-2xl font-bold text-slate-900">{surveys.length}</p>
+            </div>
+          </Card>
+          <Card className="flex items-center gap-4">
+            <div className="p-3 bg-purple-50 rounded-lg text-purple-700">
+              <Calendar className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Last Update</p>
+              <p className="text-sm font-bold text-slate-900">
+                {surveys.length > 0 ? new Date(surveys[0].timestamp).toLocaleDateString() : '-'}
+              </p>
+            </div>
+          </Card>
         </div>
 
-        <div className="flex-1 border rounded-xl overflow-hidden bg-gray-50 relative">
-          {loading ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="w-8 h-8 text-[#002855] animate-spin" />
-            </div>
-          ) : surveys.length === 0 ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-              <FileText className="w-12 h-12 mb-2 opacity-20" />
-              <p>No responses yet</p>
-            </div>
-          ) : (
-            <div className="overflow-auto h-full max-h-[500px]">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-gray-100 sticky top-0 z-10">
+        {/* Data Table */}
+        <Card noPadding className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="px-6 py-3 font-medium text-slate-500">Date</th>
+                  <th className="px-6 py-3 font-medium text-slate-500">Name</th>
+                  <th className="px-6 py-3 font-medium text-slate-500">Phone</th>
+                  <th className="px-6 py-3 font-medium text-slate-500">Response</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 bg-white">
+                {loading ? (
                   <tr>
-                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b">Date</th>
-                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b">Name</th>
-                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b">Phone</th>
-                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b">Response</th>
+                    <td colSpan={4} className="px-6 py-12 text-center">
+                      <Loader2 className="mx-auto h-8 w-8 animate-spin text-pawa-blue" />
+                      <p className="mt-2 text-slate-500">Loading data...</p>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {surveys.map((survey) => (
-                    <tr key={survey.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="p-4 text-sm text-gray-500 whitespace-nowrap">
+                ) : surveys.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                      No responses found.
+                    </td>
+                  </tr>
+                ) : (
+                  surveys.map((survey) => (
+                    <tr key={survey.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 text-slate-500 whitespace-nowrap">
                         {new Date(survey.timestamp).toLocaleDateString()}
                       </td>
-                      <td className="p-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                      <td className="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
                         {survey.name}
                       </td>
-                      <td className="p-4 text-sm text-gray-500 whitespace-nowrap">
+                      <td className="px-6 py-4 text-slate-500 whitespace-nowrap">
                         {survey.phoneNumber}
                       </td>
-                      <td className="p-4 text-sm text-gray-700 min-w-[300px]">
+                      <td className="px-6 py-4 text-slate-700 min-w-[300px]">
                         {survey.consultationAnswer}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       </div>
-    </div>
+    </Layout>
   );
 }

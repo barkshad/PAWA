@@ -46,18 +46,19 @@ export const generateConsultationReport = (surveys: SurveyData[]) => {
   const tableData = surveys.map(s => [
     new Date(s.timestamp).toLocaleDateString(),
     s.name,
+    s.idNumber || '-',
     s.phoneNumber,
     s.consultationAnswer
   ]);
 
   autoTable(doc, {
-    head: [['Date', 'Name', 'Phone', 'Response']],
+    head: [['Date', 'Name', 'ID Number', 'Phone', 'Response']],
     body: tableData,
     startY: 50,
     theme: 'grid',
     styles: {
-      fontSize: 9,
-      cellPadding: 4,
+      fontSize: 8, // Slightly smaller font to fit more columns
+      cellPadding: 3,
       textColor: [30, 41, 59], // Slate 800
       lineColor: [226, 232, 240], // Slate 200
       lineWidth: 0.1,
@@ -71,10 +72,11 @@ export const generateConsultationReport = (surveys: SurveyData[]) => {
       fillColor: [248, 250, 252], // Slate 50
     },
     columnStyles: {
-      0: { cellWidth: 25 },
-      1: { cellWidth: 35 },
-      2: { cellWidth: 30 },
-      3: { cellWidth: 'auto' }
+      0: { cellWidth: 20 },
+      1: { cellWidth: 30 },
+      2: { cellWidth: 25 },
+      3: { cellWidth: 25 },
+      4: { cellWidth: 'auto' }
     },
     didDrawPage: addFooter,
   });

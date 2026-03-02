@@ -5,28 +5,36 @@ import { CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Card } from './ui/Card';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
-import { Textarea } from './ui/Textarea';
 import { Layout } from './Layout';
+
+const CONSULTATION_OPTIONS = [
+  "Questionnaires & Youth Forums",
+  "Religious/Church Forums",
+  "Community Engagement",
+  "Online Platforms",
+  "Integrated Approach (All Methods)"
+];
 
 export default function SurveyForm({ onAdminAccess }: { onAdminAccess: () => void }) {
   const [step, setStep] = useState<'details' | 'question' | 'success'>('details');
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
+    idNumber: '',
     phoneNumber: '',
     consultationAnswer: ''
   });
 
   const handleDetailsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name && formData.phoneNumber) {
+    if (formData.name && formData.idNumber && formData.phoneNumber) {
       setStep('question');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.consultationAnswer.trim()) return;
+    if (!formData.consultationAnswer) return;
 
     setLoading(true);
     try {
@@ -42,7 +50,7 @@ export default function SurveyForm({ onAdminAccess }: { onAdminAccess: () => voi
 
   const resetForm = () => {
     setStep('details');
-    setFormData({ name: '', phoneNumber: '', consultationAnswer: '' });
+    setFormData({ name: '', idNumber: '', phoneNumber: '', consultationAnswer: '' });
   };
 
   return (
@@ -95,6 +103,13 @@ export default function SurveyForm({ onAdminAccess }: { onAdminAccess: () => voi
                       autoFocus
                     />
                     <Input
+                      label="ID Number"
+                      placeholder="Enter your National ID"
+                      value={formData.idNumber}
+                      onChange={(e) => setFormData({ ...formData, idNumber: e.target.value })}
+                      required
+                    />
+                    <Input
                       label="Phone Number"
                       type="tel"
                       placeholder="Enter your phone number"
@@ -119,18 +134,36 @@ export default function SurveyForm({ onAdminAccess }: { onAdminAccess: () => voi
                 transition={{ duration: 0.2 }}
               >
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <label className="block text-lg font-semibold text-pawa-blue">
-                      What is the single most important issue facing youth in your community today?
+                      What is the best method to conduct a nationwide youth consultation?
                     </label>
-                    <Textarea
-                      placeholder="Share your thoughts here..."
-                      value={formData.consultationAnswer}
-                      onChange={(e) => setFormData({ ...formData, consultationAnswer: e.target.value })}
-                      required
-                      rows={6}
-                      autoFocus
-                    />
+                    <div className="space-y-3">
+                      {CONSULTATION_OPTIONS.map((option) => (
+                        <label 
+                          key={option}
+                          className={`
+                            flex items-center p-4 rounded-lg border cursor-pointer transition-all
+                            ${formData.consultationAnswer === option 
+                              ? 'border-pawa-blue bg-blue-50 ring-1 ring-pawa-blue' 
+                              : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                            }
+                          `}
+                        >
+                          <input
+                            type="radio"
+                            name="consultationOption"
+                            value={option}
+                            checked={formData.consultationAnswer === option}
+                            onChange={(e) => setFormData({ ...formData, consultationAnswer: e.target.value })}
+                            className="h-4 w-4 text-pawa-blue border-slate-300 focus:ring-pawa-blue"
+                          />
+                          <span className="ml-3 text-sm font-medium text-slate-700">
+                            {option}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
                   <div className="flex gap-3 pt-2">
                     <Button
@@ -145,6 +178,7 @@ export default function SurveyForm({ onAdminAccess }: { onAdminAccess: () => voi
                       type="submit"
                       isLoading={loading}
                       className="flex-[2]"
+                      disabled={!formData.consultationAnswer}
                     >
                       Submit Response
                     </Button>

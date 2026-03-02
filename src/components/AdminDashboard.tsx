@@ -103,6 +103,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 <tr>
                   <th className="px-6 py-3 font-medium text-slate-500">Date</th>
                   <th className="px-6 py-3 font-medium text-slate-500">Name</th>
+                  <th className="px-6 py-3 font-medium text-slate-500">ID Number</th>
                   <th className="px-6 py-3 font-medium text-slate-500">Phone</th>
                   <th className="px-6 py-3 font-medium text-slate-500">Response</th>
                 </tr>
@@ -110,14 +111,14 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <tbody className="divide-y divide-slate-200 bg-white">
                 {loading ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center">
+                    <td colSpan={5} className="px-6 py-12 text-center">
                       <Loader2 className="mx-auto h-8 w-8 animate-spin text-pawa-blue" />
                       <p className="mt-2 text-slate-500">Loading data...</p>
                     </td>
                   </tr>
                 ) : surveys.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
                       No responses found.
                     </td>
                   </tr>
@@ -129,6 +130,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       </td>
                       <td className="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
                         {survey.name}
+                      </td>
+                      <td className="px-6 py-4 text-slate-500 whitespace-nowrap">
+                        {survey.idNumber || '-'}
                       </td>
                       <td className="px-6 py-4 text-slate-500 whitespace-nowrap">
                         {survey.phoneNumber}

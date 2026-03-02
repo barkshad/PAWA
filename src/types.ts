@@ -1,6 +1,7 @@
 export interface SurveyData {
   id?: string;
   name: string;
+  idNumber: string;
   phoneNumber: string;
   consultationAnswer: string;
   timestamp: number;
